@@ -9,25 +9,37 @@ import CoreML
 import SwiftUI
 
 struct ContentView: View {
-    @State private var wakeUpTime = Date.now
+    @State private var wakeUpTime = defaultWakeTime
     @State private var sleepAmount = 8.0
     @State private var coffeeAmount = 1
     @State private var alertTitle = ""
     @State private var alertMessage = ""
     @State private var showingAlert = false
+    static var defaultWakeTime: Date {
+        var components = DateComponents()
+        components.hour = 8
+        components.minute = 0
+        return Calendar.current.date(from: components) ?? .now
+    }
     var body: some View {
         NavigationStack {
-            VStack {
-                Text("When do you want to wake up?")
-                    .font(.headline)
-                DatePicker("Enter a time to wake up", selection: $wakeUpTime, displayedComponents: .hourAndMinute)
-                    .labelsHidden()
-                Text("Desired amount of sleep")
-                    .font(.headline)
-                Stepper("\(sleepAmount.formatted()) hour(s)", value: $sleepAmount, in: 5...12, step: 0.5)
-                Text("Daily coffee intake")
-                    .font(.headline)
-                Stepper("\(coffeeAmount) cup(s)", value: $coffeeAmount, in: 0...10)
+            Form {
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("When do you want to wake up?")
+                        .font(.headline)
+                    DatePicker("Enter a time to wake up", selection: $wakeUpTime, displayedComponents: .hourAndMinute)
+                        .labelsHidden()
+                }
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("Desired amount of sleep")
+                        .font(.headline)
+                    Stepper("\(sleepAmount.formatted()) hour(s)", value: $sleepAmount, in: 5...12, step: 0.5)
+                }
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("Daily coffee intake")
+                        .font(.headline)
+                    Stepper("^[\(coffeeAmount) cup](inflect: true)", value: $coffeeAmount, in: 1...20)
+                }
             }
             .navigationTitle("Better Rest")
             .toolbar {
@@ -37,7 +49,6 @@ struct ContentView: View {
                     Text("Calculate")
                 })
             }
-            .padding()
         }
         .alert(alertTitle, isPresented: $showingAlert) {
             Button("Okay") { }
